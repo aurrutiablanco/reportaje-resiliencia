@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resiliencia en Escena - Kinesis</title>
+    <style>
+        /* ==========================================================================
+           1. CONFIGURACIÓN GENERAL Y PALETA DE COLORES (TODAS LAS LETRAS GEORGIA)
+           ========================================================================== */
+        :root {
+            --bg-white: #ffffff;           
+            --bg-light: #f9fafb;           
+            --text-black: #111111;         
+            --text-muted: #333333;         
+            --primary-blue: #1e3a8a;       
+            --accent-gold: #b45309;        
+            --border-color: #e5e7eb;       
+            
+            /* Tipografía unificada para toda la página */
+            --font-editorial: 'Georgia', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth; 
+        }
+
+        body {
+            background-color: var(--bg-white);
+            color: var(--text-muted);
+            font-family: var(--font-editorial);
+            line-height: 1.8;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* BARRA DE SECCIONES INTERACTIVA */
+        .nav-bar {
+            background-color: #000000;     
+            border-bottom: 1px solid #222222;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-editorial);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-bar .brand {
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            color: #ffffff;                
+        }
+
+        /* CONTROL DEL DESPLEGABLE */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background: none;
+            border: none;
+            font-family: var(--font-editorial);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffffff;                
+            cursor: pointer;
+            padding: 0.5rem 0;
+            font-weight: 500;
+        }
+
+        .dropdown-btn:hover {
+            color: var(--accent-gold);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #111111;     
+            min-width: 280px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid #333333;
+            border-top: 2px solid var(--accent-gold);
+            border-radius: 0 0 4px 4px;
+            padding: 0.5rem 0;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 0.75rem 1.2rem;
+            color: #cccccc;                
+            text-decoration: none;
+            font-family: var(--font-editorial);
+            font-size: 0.8rem;
+            text-transform: none;
+            letter-spacing: 0;
+            line-height: 1.4;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #222222;
+            color: var(--accent-gold);
+        }
+
+        .dropdown-item.main-title-link {
+            font-weight: bold;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.25rem;
+            color: #ffffff;
+        }
+
+        /* ==========================================================================
+           2. PORTADA ASIMÉTRICA (HERO) - AJUSTADA PARA IMAGEN VERTICAL 1338x1520 Y CAPTION
+           ========================================================================== */
+        .hero-section {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            min-height: calc(100vh - 60px);
+            align-items: center;
+            padding: 3rem 2rem;
+            gap: 4rem;
+            scroll-margin-top: 80px; 
+        }
+
+        .hero-text h1 {
+            font-family: var(--font-editorial);
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--text-black);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .gold-divider {
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-gold);
+            margin-bottom: 2rem;
+        }
+
+        /* Contenedor adaptado para mostrar la imagen completa y el caption */
+        .hero-image-container {
+            width: 100%;
+            height: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-image-container img {
+            width: 100%;
+            height: 425px;
+            display: block;
+            object-fit: contain; /* Garantiza que se renderice completa respetando su proporción vertical */
+        }
+
+        /* Estilo para el caption de la imagen de portada */
+        .hero-image-caption {
+            font-family: var(--font-editorial);
+            font-size: 0.9rem;
+            color: #555555;
+            padding: 0.5rem 1rem;
+            text-align: right;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .hero-image-caption strong {
+            font-weight: bold;
+        }
+
+        /* ==========================================================================
+           3. DISEÑO EDITORIAL DEL CUERPO Y METADATOS DE AUTORÍA
+           ========================================================================== */
+        .article-body {
+            max-width: 680px; 
+            margin: 0 auto 6rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .author-meta {
+            font-family: var(--font-editorial);
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
+        }
+
+        .author-byline {
+            color: #555555;
+            margin-bottom: 0.2rem;
+        }
+
+        .author-name {
+            color: #666666;
+            text-underline-offset: 3px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .author-date {
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+            text-align: justify;
+        }
+
+        h2.section-subtitle {
+            font-family: var(--font-editorial);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 3.5rem 0 1.2rem 0;
+            color: var(--text-black);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            scroll-margin-top: 80px; 
+        }
+
+        /* ESTRUCTURA INTERACTIVA PARA LAS VÉRTEBRAS */
+        .tooltip-container {
+            position: relative;
+            display: inline;
+            cursor: help;
+            border-bottom: 2px dashed var(--accent-gold);
+            padding-bottom: 1px;
+        }
+
+        .tooltip-box {
+            visibility: hidden;
+            opacity: 0;
+            width: 320px;
+            background-color: #111111;
+            color: #eeeeee;
+            text-align: left;
+            border-radius: 6px;
+            padding: 1.2rem;
+            position: absolute;
+            z-index: 10;
+            left: 105%; /* Se despliega hacia la derecha */
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid #333333;
+            border-left: 4px solid var(--accent-gold);
+            font-family: var(--font-editorial);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+        /* Títulos internos del cuadro explicativo */
+        .tooltip-box strong {
+            color: #ffffff;
+        }
+
+        .tooltip-box .tooltip-section {
+            margin-top: 0.8rem;
+            display: block;
+        }
+
+        /* Evento Hover: Muestra el cuadro explicativo al pasar el mouse */
+        .tooltip-container:hover .tooltip-box {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* ==========================================================================
+           4. COMPONENTES REPRODUCTORES DE VIDEO (TODOS UNIFICADOS)
+           ========================================================================== */
+        .video-box {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-gold);
+            padding: 1.5rem;
+            margin: 3rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .video-responsive-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; 
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            background-color: #000000;
+            border-radius: 4px;
+        }
+
+        .video-custom-embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: filter 0.3s ease;
+        }
+
+        .video-custom-embed:hover {
+            filter: brightness(0.9);
+        }
+
+        .video-custom-embed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        .video-custom-embed:hover::before {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .play-button-overlay {
+            position: relative;
+            z-index: 2;
+            width: 68px;
+            height: 48px;
+            background-color: rgba(33, 33, 33, 0.9);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        .play-button-overlay::after {
+            content: '';
+            display: block;
+            border-style: solid;
+            border-width: 10px 0 10px 18px;
+            border-color: transparent transparent transparent #ffffff;
+            margin-left: 3px;
+        }
+
+        .video-custom-embed:hover .play-button-overlay {
+            background-color: #cc181e; 
+        }
+
+        .video-caption {
+            font-family: var(--font-editorial);
+            font-size: 0.9rem;
+            font-style: normal; 
+            color: #555555;
+            line-height: 1.5;
+        }
+
+        .video-caption.small-muted {
+            font-size: 0.85rem;
+            font-style: normal;
+            color: #666666;
+        }
+
+        .interactive-quote {
+            background-color: rgba(30, 58, 138, 0.05);
+            border-bottom: 2px dashed var(--primary-blue);
+            padding: 0 0.2rem;
+        }
+
+        /* Responsividad */
+        @media (max-width: 968px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+                padding-top: 2rem;
+            }
+            .hero-text h1 { font-size: 2.6rem; }
+            h2.section-subtitle { font-size: 1.5rem; }
+            p { font-size: 1.1rem; }
+            .tooltip-box {
+                left: 0;
+                top: 100%;
+                transform: translateY(10px);
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar">
+        <div class="dropdown-container">
+            <button class="dropdown-btn" id="sectionsToggle">☰ Secciones ▾</button>
+            <div class="dropdown-menu" id="sectionsMenu">
+                <a href="#inicio" class="dropdown-item main-title-link">Resiliencia en Escena (Inicio)</a>
+                <a href="#resistencia" class="dropdown-item">La Resistencia: El movimiento como medicina</a>
+                <a href="#limite" class="dropdown-item">El Límite: La advertencia médica</a>
+                <a href="#puente" class="dropdown-item">El puente hacia la autonomía</a>
+                <a href="#adaptacion" class="dropdown-item">La danza como adaptación somática</a>
+            </div>
+        </div>
+        
+        <div class="brand">Kinesis</div>
+        <div style="color: #ffffff; font-weight: bold;">REPORTAJE</div>
+    </nav>
+
+    <header class="hero-section" id="inicio">
+        <div class="hero-text">
+            <div class="gold-divider"></div>
+            <h1>Resiliencia en Escena: Cuando un diagnóstico no es el final</h1>
+        </div>
+        <div>
+            <div class="hero-image-container">
+                <img src="primeraImagen.PNG" alt="Portada Resiliencia en Escena">
+                <div class="hero-image-caption">Dayana Páez en un ensayo de danza<br><strong>Elena Páez</strong></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="article-body">
+
+        <div class="author-meta">
+            <div class="author-byline">Por <span class="author-name">Elena Páez</span></div>
+            <div class="author-date">29 Mayo de 2026</div>
+        </div>
+
+        <p>
+            Las enfermedades crónicas son las responsables del 59% de las muertes y del 46% del impacto en la salud de la población en todo el mundo, según datos de la Organización Mundial de la Salud (OMS). Estas patologías no solo inflaman las articulaciones, sino que alteran drásticamente la identidad del paciente. "Usted tiene que parar la actividad, no puede seguir bailando". Para un artista, estas palabras en la consulta de un especialista no representan únicamente un diagnóstico médico, sino la posibilidad de perder la forma en la que se expresa y su movimiento.
+        </p>
+
+        <p>
+            La ansiedad en estos pacientes explica el 40.7% de la variación en su funcionamiento social, de acuerdo con una investigación de la Universidad de Salamanca en España. No es solo dolor, es una patología que limita la participación profesional y que puntúa significativamente por debajo de la población normal en vitalidad y rol físico. In este contexto, la artritis reumatoide se convierte en el principal obstáculo para quienes practican alguna disciplina.
+        </p>
+
+        <p>
+            Este choque entre la advertencia del médico y la pasión del artista genera un gran debate. Mientras la ciencia impone límites para proteger los huesos y las articulaciones, los profesores de danza buscan la forma de mantener activo el cuerpo. En el siguiente video, verás el contraste directo entre el diagnóstico médico y las alternativas de los coreógrafos, una comparación que te permitirá entender con claridad dónde termina el peligro físico y dónde empieza la libertad de bailar con seguridad.
+        </p>
+
+        <div class="video-box">
+            <div class="video-responsive-wrapper">
+                <a class="video-custom-embed" href="https://youtu.be/fsxZEuoay18?si=RRlzc6QlVn_2mIC_" target="_blank" style="background-image: url('https://img.youtube.com/vi/fsxZEuoay18/hqdefault.jpg');">
+                    <div class="play-button-overlay"></div>
+                </a>
+            </div>
+        </div>
+
+        <h2 class="section-subtitle" id="resistencia">La Resistencia: El movimiento como medicina</h2>
+        
+        <p>
+            A los 25 años, justo cuando su carrera iba en ascenso, el profesor de danza Edithson Estrada sufrió, tras cargar peso excesivo en unos ensayos, un daño en su columna, tres hernias discales en 
+            <span class="tooltip-container">
+                <strong>las vértebras L1, L2 y S5</strong>
+                <span class="tooltip-box">
+                    Las vértebras L1, L2 y S5 pertenecen a diferentes secciones de la columna vertebral y cumplen funciones biomecánicas distintas.
+                    <span class="tooltip-section"><strong>L1 y L2 (Región Lumbar):</strong> Son las primeras dos vértebras de la parte baja de la espalda (zona lumbar). Son huesos muy grandes y robustos porque soportan la mayor parte del peso corporal.</span>
+                    <span class="tooltip-section"><strong>S5 (Región Sacra):</strong> Pertenece al sacro, un hueso grande y aplanado ubicado en la base de la columna, justo encima del coxis.</span>
+                </span>
+            </span>. 
+            El primer traumatólogo que consultó le dijo que debía someterse a cirugía y abandonar la danza para siempre.
+        </p>
+
+        <p>
+            Sin embargo, en lugar de retirarse, Edithson buscó una segunda opinión gracias a la recomendación de una amiga. Así llegó a un médico chino en la ciudad de Valencia, quien además de ser traumatólogo, era acupunturista. El cual tras el diagnóstico le propuso un camino distinto, 21 días de reposo absoluto sobre un colchón ortopédico y cuatro sesiones de acupuntura.
+        </p>
+
+        <p>
+            A diferencia del primer médico, este le dio una "clase magistral" sobre el funcionamiento de las hernias y le aseguró que, con los cuidados correctos, no debía dejar su arte. Hoy, seis años después, Edithson sigue bailando y dando clases. Su filosofía de vida se basa en la constancia diaria, "Si yo no me muevo un día, al siguiente empiezo como a engarrotarme", asegura. Además de la actividad constante, mantiene una disciplina estricta que lo hace sentirse, a sus 32 años, con más energía que a los 15.
+        </p>
+
+        <h2 class="section-subtitle" id="limite">El Límite: La advertencia médica</h2>
+        
+        <p>
+            Sin embargo, la medicina interna plantea la realidad clínica. El Doctor Darío Saturno explica que la artritis reumatoide es una inflamación inmunológica que afecta las pequeñas y grandes articulaciones, y que, a la larga, resulta discapacitante. A su vez, según un estudio realizado en la Universidad de Salamanca, la presencia de cuadros depresivos en pacientes con enfermedades crónicas aumenta hasta 2.5 veces más la probabilidad de perder la autonomía física.
+        </p>
+
+        <p>
+            Por lo que, los doctores especializados advierten que las actividades de grandes impactos sobre muñecas y miembros inferiores pueden acelerar deformidades irreversibles. Para la ciencia, la salud articular debe estar siempre por encima de cualquier exigencia artística y la danza solo debe practicarse si es dirigida por un especialista en rehabilitación.
+        </p>
+
+        <h2 class="section-subtitle" id="puente">El puente hacia la autonomía</h2>
+        
+        <p>
+            Por otro lado, la experiencia de Dayana Páez demuestra que la determinación y la disciplina son claves para este proceso de recuperación. Sin embargo, la transición entre el dolor crónico y el poder bailar requiere de una metodología que entienda al cuerpo no como algo deteriorado, sino como un sistema capaz de adaptarse. Aquí es donde la pedagogía se convierte en el puente necesario para que historias como la de Dayana pasen de la inmovilidad a un movimiento funcional.
+        </p>
+
+        <p>
+            Pero, ¿cómo se vive esta situación en carne propia cuando los dolores no te dejan caminar? El paso de la teoría a la realidad cobra sentido al conocer las vivencias de quienes decidieron no quedarse en reposo absoluto. Haz clic en el siguiente video para conocer la historia de Dayana Páez, un testimonio real que te mostrará cómo fue su evolución y de qué manera la danza adaptada la ayudó a recuperar el movimiento y el bienestar mental.
+        </p>
+
+        <div class="video-box">
+            <div class="video-responsive-wrapper">
+                <a class="video-custom-embed" href="https://youtu.be/ZnWSEeO6V6Q?si=Yx0_xhBUKj35bQ8j" target="_blank" style="background-image: url('https://img.youtube.com/vi/ZnWSEeO6V6Q/hqdefault.jpg');">
+                    <div class="play-button-overlay"></div>
+                </a>
+            </div>
+        </div>
+
+        <h2 class="section-subtitle" id="adaptacion">La danza como adaptación somática</h2>
+        
+        <p>
+            Por otro lado, la profesora Kimberlyn Urbina, utiliza la técnica Horton (Lerto) y el concepto del "nervio móvil" de nuestro sistema nervioso y ha diseñado un enfoque somático donde el objetivo deja de ser la perfección estética para centrarse en la conciencia y protección del cuerpo.
+        </p>
+
+        <p>
+            Al adaptar la danza contemporánea con elementos de pilates y ballet para adultos, su método logra mejorar la salud de los tejidos y devuelve la sensación de control sobre el cuerpo. Este también guía a los alumnos en un proceso de mínimo a máximo, permitiendo que incluso personas con dificultades articulares rompan paradigmas sobre sus límites. No se busca el salto acrobático, sino que el paciente recupere la confianza en que su cuerpo aún es capaz de ejecutar movements.
+        </p>
+
+        <p>
+            La coexistencia entre la danza y la artritis depende del equilibrio entre la pasión y el límite biológico. Al priorizar la salud de las articulaciones sin abandonar el movimiento, la medicina y el arte encuentran un espacio común. Un diagnóstico crónico no tiene por qué ser el fin de un sueño, puede ser el punto de partida para perseguir otros proyectos.
+        </p>
+
+        <p>
+            Todo este camino artístico y personal no se sostiene solo en la fuerza de voluntad, también tiene un respaldo científico a nivel mundial. Para cerrar esta investigación, te presentamos un reportaje donde explicamos los datos de las bases de datos SciELO y PubMed. Al verlo, descubrirás las pruebas científicas que demuestran por qué el ejercicio guiado ayuda a los pacientes tanto física como psicológicamente.
+        </p>
+
+        <div class="video-box">
+            <div class="video-responsive-wrapper">
+                <a class="video-custom-embed" href="https://youtu.be/MvI5LubIyGU?si=rtciniibp6IIT4Al" target="_blank" style="background-image: url('https://img.youtube.com/vi/MvI5LubIyGU/hqdefault.jpg');">
+                    <div class="play-button-overlay"></div>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sectionsToggle = document.getElementById('sectionsToggle');
+            const sectionsMenu = document.getElementById('sectionsMenu');
+
+            sectionsToggle.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                sectionsMenu.classList.toggle('show');
+            });
+
+            sectionsMenu.addEventListener('click', () => {
+                sectionsMenu.classList.remove('show');
+            });
+
+            document.addEventListener('click', () => {
+                sectionsMenu.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>
